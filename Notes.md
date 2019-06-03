@@ -17,9 +17,9 @@ A collection of my notes while preparing for Security Engineering positions, spe
 ---
 
 2. Broken Authentication
-    * No RBAC / Broken RBAC
+    * No RBAC(Role-Based Access Control) / Broken RBAC
     * Account bruteforce
-    * Weak credential requirements
+    * Weak credential requirements or overly specific credential requirements
     * Poor session management
         * Sessions not invalidated upon logging out
         * Sessions not rotated upon next login
@@ -42,13 +42,14 @@ A collection of my notes while preparing for Security Engineering positions, spe
     * Not using HTTPS
     * Weak crypto primitives (encryption/hashing)
     * Exposing information
-        * S3 Buckets/Databases/Key-Value Stores
+        * S3 Buckets/Digital Ocean Spaces/Databases/Key-Value Stores
 
 **Remediations:**
 * Ensure a data classification matrix exists - Use this to determine what is sensitive and what is not. Use this as your source of truth when determining how to store data.
 * Encrypt sensitive data at rest
     * Use a sane strategy where each "customer" has their own key
 * Hash data that is not need to be known (eg. passwords)
+    * hash scheme should hash N number of times (pick some arbitrary number)
     * bcrypt, argon2
     * Each user should have a randomly generated salt
     * If you're feeling extra secure, have an application-level pepper value that is used for all hashing
@@ -168,12 +169,12 @@ A collection of my notes while preparing for Security Engineering positions, spe
 ### Other Web Vulnerabilities
 
 * Cross-Site Request Forgery (CSRF)
-    * The ability to make a state-changing action on another website via a simple request. This abuses the fact that the browser will always send cookies to the website you are making a request to. This allows a malicious site to trick a user into making a state-changing action on a different site by submitting a form or having an AJAX request auto-run when a page is visited.
+    * The ability to make a state-changing action on another website via a simple request. This abuses the fact that the browser will always send cookies to the website you are making a request to. This allows a malicious site to trick a user into making a state-changing action on a different site (in the context of the user) by submitting a form or having an AJAX request auto-run when a page is visited.
 
 **Remediation:**
 * CSRF Tokens
-    * A randomized header value that is assigned when a session is established with a website
-    * A randomized value that is submitted with every request that is tied to a user's session
+    * A randomized header value (nonce) that is assigned when a session is established with a website
+    * A nonce that is submitted with every request that is tied to a user's session
 * Same-Site Cookies
     * Browser security feature that blocks sending cookies to third-party websites (when the web application sets the cookie this way)
     * `Set-Cookie: key=value; HttpOnly; SameSite=strict` - This cookie is only sent when using the web application in question. Whenever it is requested as a third-party, the cookie is not sent.'
@@ -221,6 +222,8 @@ A collection of my notes while preparing for Security Engineering positions, spe
     * Most of these attacks are outside of the scope of a web application vulnerability but are still worth knowing for breadth of knowledge
         * Memory Corruption
         * Buffer Overflow
+        * Integer Overflow
+        * Type Confusion
         * Use After Free (UAF)
 * For most other types of attacks and potential attack payloads, use [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings)
     * When putting this together, this source was referenced extensively. I cannot give enough thanks to those that work on that project.

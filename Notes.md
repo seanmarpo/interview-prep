@@ -179,6 +179,14 @@ A collection of my notes while preparing for Security Engineering positions, spe
     * Browser security feature that blocks sending cookies to third-party websites (when the web application sets the cookie this way)
     * `Set-Cookie: key=value; HttpOnly; SameSite=strict` - This cookie is only sent when using the web application in question. Whenever it is requested as a third-party, the cookie is not sent.'
     * `Set-Cookie: key=value; HttpOnly; SameSite=lax` - This cookie is sent on anchor tags, link tags, and GET requests
+* Double Submit Cookie
+    * Set a cookie which contains a sufficiently random value
+    * Ensure each request also includes a parameter with the same value as the cookie
+    * Rationale: Another origin cannot read the cookie value of another origin, therefore they cannot predict the required parameter value for each request.
+* Custom Request Header
+    * Include an arbitrary HTTP header with each request (eg. `X-Requested-With: XMLHttpRequest`)
+    * Other domains cannot set an HTTP header for an Ajax request without an improper CORS configuration
+    * Does not protect against `<form>` elements or anything submitted via an HTML flow
 
 ---
 
@@ -273,4 +281,6 @@ A collection of my notes while preparing for Security Engineering positions, spe
 * Subresource Integrity (SRI)
     * Ensures content fetched by your browser matches a cryptographic hash
     * Extremely useful when fetching JS/CSS payloads from a CDN or resource you do not control
+
+## Cryptography
 

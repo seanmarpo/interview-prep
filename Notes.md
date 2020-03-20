@@ -218,7 +218,7 @@ A collection of my notes while preparing for Security Engineering positions, spe
     * Not validating origin headers
         * Allows arbitrary origins to establish a web socket with your web socket server
     * Missing Authentication
-        * Web sockets have concept of state. Typically, a session or authorization token is validated before being allowed to establish a socket. Ensure this is the case.
+        * Web sockets have no concept of state. Typically, a session or authorization token is validated before being allowed to establish a socket. Ensure this is the case.
 * (Distributed) Denial of Service (DDoS)
     * The ability to cause an application to stop responding or "hang" indefinitely or for an extended period of time.
     * Network level
@@ -255,6 +255,7 @@ A collection of my notes while preparing for Security Engineering positions, spe
         * `Access-Control-Allow-Methods` - What methods can be used cross-origin
         * `Access-Control-Allow-Headers` - What headers can be sent cross-origin
         * `Access-Control-Max-Age` - How long until you need to make another pre-flighted request
+        * `Access-Control-Allow-Credentials` - Whether the browser should send credentials with the request (Cookies, Authorization headers, or TLS client certificates)
     * "Simple requests" do not trigger a pre-flight request
         * Methods: `GET`, `HEAD`, `POST`
     * All other requests trigger a pre-flight request which is an HTTP `OPTIONS` request to determine the CORS requirements of the cross-origin site being requested
@@ -283,4 +284,76 @@ A collection of my notes while preparing for Security Engineering positions, spe
     * Extremely useful when fetching JS/CSS payloads from a CDN or resource you do not control
 
 ## Cryptography
+* Encryption vs Hashing
+    * Encryption is reversible, whereas hashing should not be reversible (without bruteforcing the solution)
+    * Customer data should be encrypted at rest, not hashed (as it needs to be retrieved at some point)
+    * Password do not need to be retrieved in plaintext ever, so it makes sense to hash them
+
+* Encryption Algorithms
+    * AES
+        * ECB - Bad, encrypt block by block with static IV
+        * CBC - Better, each block is chained into the next block
+        * OTR - Better, turns our block cipher into a stream cipher
+        * GCM (Also authenticated) - Best, stream cipher similar to CTR mode but also authenticates the final result to ensure tamper resistance
+    * ChaCha20
+
+* Encryption Best Practices
+    * IV - Generate this securely and randomly
+        * In GCM mode, this may be called a nonce
+        * Never re-use an IV/nonce
+
+* Hashing Algorithms
+    * MD5 - Nope
+    * SHA1 - Nope
+    * SHA256 - Minimal suggested hashing algorithm
+    * Bcrypt - Computationally expensive 
+    * Scrypt - Memory expensive
+    * Argon2
+        * Argon2i - Protects against side channel attacks
+        * Argon2d - Protects against GPU cracking
+
+* Hashing Best Practices
+    * Use a salt
+    * Use a unique salt for each hash run
+    * Hash N number of times to prevent timing attacks
+    * If you so desire, have an application-wide pepper as well
+
+* Authenticated Hashing
+    * H/MAC - Keyed-Hash Message Authentication Code
+        * Provides authenticity for a message. Your message is NOT encrypted or obfuscated!
+        * Tow parties can validate that they have the same data by utilizing an HMAC
+        * HMAC comes in many flavors referencing the underlying hashing algorithm (eg. HMAC-MD5, HMAC-SHA1, HMAC-SHA256)
+
+* Symmetric vs Asymmetric Crypto
+    * Symmetric - Two or more parties share a key
+        * This key can be used to decrypt the data
+        * The problem: How do you securely exchange the key? This needs to be resolved for this method to maintain the CIA triad.
+    * Asymmetric - Each party has a pair of keys (a public and private)
+        * You encrypt with your public key
+        * You decrypt with your private key
+        * Do not need to exchange keys. Anyone can see your public key and must use it to encrypt data that you can view.
+
+* Public Key Crypto
+    * TLS Certs
+    * Client TLS Certs
+    * Certificate Authorities
+
+## Tokens
+* JWT - A compact way to exchange information between parties as a JSON object. It is signed with an HMAC. JWT tokens can also be encrypted if desired (JWTe).
+    * Header
+        * Typically consists of two pieces:
+            * Algorithm (alg) - Signing algorithm used (eg. HS256, RS256, ES256)
+            * Type (typ) - Always will be "JWT" if a true JWT token
+    * Payload
+        * Registered claims
+            * Defined in the RFC spec
+        * Public claims
+            * Defined by the user
+        * Private claims
+            * Defined by the user
+        * JSON payload of keys and values to be seen by the other party
+        * Not encrypted (unless the whole token is encrypted)
+    * Signature
+        * HMAC of the header and payload, keyed by the secret
+        * `HMAC(base64(header) + "." + base64(payload), secret)`
 
